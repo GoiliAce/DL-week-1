@@ -1,0 +1,26 @@
+[
+    {
+        "model": "GaussianNB",
+        "accuracy": 0.9777777777777777,
+        "f1_score": 0.974320987654321,
+        "confusion_matrix": "[[19  0  0]\n [ 0 12  1]\n [ 0  0 13]]"
+    },
+    {
+        "model": "SVC",
+        "accuracy": 1.0,
+        "f1_score": 1.0,
+        "confusion_matrix": "[[19  0  0]\n [ 0 13  0]\n [ 0  0 13]]"
+    },
+    {
+        "model": "LinearRegression",
+        "accuracy": 1.0,
+        "f1_score": 1.0,
+        "confusion_matrix": "[[19  0  0]\n [ 0 13  0]\n [ 0  0 13]]"
+    },
+    {
+        "model": "DecisionTreeClassifier",
+        "accuracy": 1.0,
+        "f1_score": 1.0,
+        "confusion_matrix": "[[19  0  0]\n [ 0 13  0]\n [ 0  0 13]]"
+    }
+]
