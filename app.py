@@ -3,19 +3,20 @@ import pickle
 import os
 import pandas as pd
 from main import CustomClassifier
+from visualize import visualize
 import numpy as np
+import altair as alt
+st.set_page_config(layout="wide")
 
 model_files = os.listdir('model')
-selected_model = st.sidebar.selectbox('Select Model', model_files)
+selected_opt = st.sidebar.selectbox('Select feature', [ 'Visualize data', 'App'])
 
-selected_type = st.sidebar.selectbox('Select Data Type', ['User Input', 'Input From CSV'])
 
-model_path = os.path.join('model', selected_model)
+
 
 class_name = ['Iris-setosa', 'Iris-versicolor', 'Iris-virginica']
 
-with open(model_path, 'rb') as model_file:
-    loaded_model = pickle.load(model_file)
+
 
 def user_input_features():
     sepal_length = st.sidebar.slider('Sepal length', 4.3, 7.9, 5.4)
@@ -40,23 +41,14 @@ def csv_input_feadures():
         return df
     else:
         return None
-def user_input():
+def user_input(loaded_model):
     df = user_input_features()
     st.subheader('User Input parameters')
     st.write(df)
-
-    # Load the saved model
-
-
-    # Predict the flower type
     y_pred = loaded_model.predict(df)
-    if selected_model =='LinearRegression.pkl':
-        y_pred = np.round(y_pred).astype(np.int32)
-        y_pred[y_pred==-0] = 0
     print(y_pred)
     # prediction_proba = loaded_model.predict(df)
     st.subheader('Prediction')
-    st.write('Predicted class:')
     st.write(f'<span style="color: green; font-size:32px;">{class_name[y_pred[0]]}</span>', unsafe_allow_html=True)
     # hiện ảnh:
 
@@ -72,7 +64,7 @@ def choose_image(x):
     elif x==class_name[2]:
         url = 'https://i.ibb.co/6W6WvzS/Iris-virginica.jpg'
     return  f'![Image]({url})'
-def csv_input():
+def csv_input(loaded_model):
     
     df = csv_input_feadures()
     if df is not None:
@@ -80,31 +72,36 @@ def csv_input():
         
         # st.write(df)
         y_pred = loaded_model.predict(df)
-        if selected_model =='LinearRegression.pkl':
-            y_pred = np.round(y_pred).astype(np.int32)
-            y_pred[y_pred==-0] = 0
         df['Predicted class'] = [class_name[x] for x in y_pred]
         df['Image'] = df['Predicted class'].apply(lambda x: x)
         df['Image'] = df['Image'].apply(choose_image)
         
         # Display DataFrame with images embedded
         st.write(df.to_markdown(), unsafe_allow_html=True)
-if selected_type == 'User Input':
-    user_input()
-elif selected_type == 'Input From CSV':
-    demo = st.sidebar.checkbox('Demo')
-    if demo:
-        df = pd.read_csv('data/X_test.csv')
-        df = df.sample(5)
-        df.columns = ['sepal_length', 'sepal_width', 'petal_length', 'petal_width']
-        y_pred = loaded_model.predict(df)
-        if selected_model =='LinearRegression.pkl':
-            y_pred = np.round(y_pred).astype(np.int32)
-            y_pred[y_pred==-0] = 0
-        df['Predicted class'] = [class_name[x] for x in y_pred]
-
-        df['Image'] = df['Predicted class'].apply(lambda x: x)
-        df['Image'] = df['Image'].apply(choose_image)
-        st.write(df.to_markdown(), unsafe_allow_html=True)
-    else:
-        csv_input()
+def __main__():
+    if selected_opt == 'App':
+        selected_model = st.sidebar.selectbox('Select Model', model_files)
+        model_path = os.path.join('model', selected_model)
+        with open(model_path, 'rb') as model_file:
+            loaded_model = pickle.load(model_file)
+        selected_type = st.sidebar.selectbox('Select Data Type', ['User Input', 'Input From CSV'])
+        if selected_type == 'User Input':
+            user_input(loaded_model)
+        elif selected_type == 'Input From CSV':
+            demo = st.sidebar.checkbox('Demo')
+            if demo:
+                df = pd.read_csv('data/X_test.csv')
+                df = df.sample(5)
+                df.columns = ['sepal_length', 'sepal_width', 'petal_length', 'petal_width']
+                y_pred = loaded_model.predict(df)
+                df['Predicted class'] = [class_name[x] for x in y_pred]
+                df['Image'] = df['Predicted class'].apply(lambda x: x)
+                df['Image'] = df['Image'].apply(choose_image)
+                st.write(df.to_markdown(), unsafe_allow_html=True)
+            else:
+                csv_input(loaded_model)
+    elif selected_opt == 'Visualize data':
+        visualize()
+        
+if __name__ == '__main__':
+    __main__()
